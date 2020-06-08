@@ -4,12 +4,28 @@
     <title>This is the title of the webpage!</title>
   </head>
   <body>
-    <p>Use: <div id="selectedValues"></div></p>
-    <p>Target: <div id="targetValue"></div></p>
-    <p>Solution: <div id="solution"></div></p>
+    <p>
+      Use: <div id="selectedValues"></div>
+    </p>
+    <p>
+      Target: <div id="targetValue"></div>
+    </p>
+    <p>
+      <button id="solutionBtn" onclick="toggleSolution()">Solution</button><div id="solution" style="display: none"></div>
+    </p>
     <script>
+
+let solutionDiv = document.getElementById("solution");
+
 function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
+}
+function toggleSolution() {
+  if (solutionDiv.style.display === "none") {
+    solutionDiv.style.display = "block";
+  } else {
+    solutionDiv.style.display = "none";
+  }
 }
 let values = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 25, 50, 75, 100];
 
@@ -24,13 +40,13 @@ let nextTargetDirection = -1;
 
 document.getElementById("selectedValues").textContent = selectedValues.join();
 document.getElementById("targetValue").textContent = targetValue;
-document.getElementById("solution").innerHTML = "";
+solutionDiv.innerHTML = "";
 
 var worker = new Worker('worker.js');
 worker.onmessage = function(e) {
   let solution = e.data;
   let solutionText = !!solution ? solution.join("<br/>") : `No solution for ${targetValue}!`;
-  document.getElementById("solution").innerHTML = document.getElementById("solution").innerHTML + "<br/>" + solutionText;
+  solutionDiv.innerHTML = solutionDiv.innerHTML + "<br/>" + solutionText;
 
   if (!solution) {
     targetValue = targetValue + (nextTargetStep * nextTargetDirection);
