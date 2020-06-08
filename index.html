@@ -11,50 +11,6 @@
 function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
 }
-
-function add(a, b) { return a + b; }
-function addfmt(a, b) { return `${a} + ${b}`; }
-function mul(a, b) { return a * b; }
-function mulfmt(a, b) { return `${a} * ${b}`; }
-function sub(a, b) { return a - b; }
-function subfmt(a, b) { return `${a} - ${b}`; }
-function div(a, b) { return (a % b == 0) ? a / b : null; }
-function divfmt(a, b) { return `${a} / ${b}`; }
-
-let ops = [add, mul, sub, div];
-let fmts = [addfmt, mulfmt, subfmt, divfmt];
-
-function solve(values, target) {
-  if (values.indexOf(target) >= 0) {
-    return [];
-  }
-  if (values.length < 2) {
-    return null;
-  }
-
-  for (let i = 0; i < values.length; i++) {
-    for (let j = i+1; j < values.length; j++) {
-      let a = Math.max(values[i], values[j]);
-      let b = Math.min(values[i], values[j]);
-
-      for (let k = 0; k < ops.length; k++) {
-        let op = ops[k];
-        let fmt = fmts[k];
-        let res = op(a, b);
-        if (!res) {
-          continue;
-        }
-        let solution = solve([res].concat(values.slice(0, i), values.slice(i+1, j), values.slice(j+1)), target);
-        if (solution !== null) {
-          return [`${fmt(a, b)} = ${res}`].concat(solution);
-        }
-      }
-    }
-  }
-
-  return null;
-}
-
 let values = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 25, 50, 75, 100];
 
 let selectedValues = [];
@@ -63,11 +19,17 @@ while (selectedValues.length < 6) {
   selectedValues.push(values.splice(selectedIndex, 1)[0]);
 }
 let targetValue = getRandomInt(900) + 100;
-let solution = solve(selectedValues, targetValue);
 
-document.getElementById("selectedValues").textContent = selectedValues.join();
-document.getElementById("targetValue").textContent = targetValue;
-document.getElementById("solution").textContent = solution.join(" ; ");
+var worker = new Worker('worker.js');
+worker.onmessage = function(e) {
+  let solution = e.data;
+
+  document.getElementById("selectedValues").textContent = selectedValues.join();
+  document.getElementById("targetValue").textContent = targetValue;
+  document.getElementById("solution").textContent = !!solution ? solution.join(" ; ") : "No solution!";
+};
+
+worker.postMessage(selectedValues.concat([targetValue]));
     </script>
   </body>
 </html>
