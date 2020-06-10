@@ -8,8 +8,8 @@ function mul(a, b) { return (a != 1 && b != 1) ? a * b : null; }
 function sub(a, b) { return (a != b) ? a - b : null; }
 function div(a, b) { return (a % b == 0 && b != 1) ? a / b : null; }
 
-let ops = [add, mul, sub, div];
-let signs = ["+", "*", "-", "/"];
+let ops = [add, sub, mul, div];
+let signs = ["+", "-", "*", "/"];
 
 function solve(values, target) {
   if (values.indexOf(target) >= 0) {
@@ -19,14 +19,15 @@ function solve(values, target) {
     return null;
   }
 
-  for (let i = 0; i < values.length; i++) {
-    for (let j = i+1; j < values.length; j++) {
-      let a = Math.max(values[i], values[j]);
-      let b = Math.min(values[i], values[j]);
 
-      for (let k = 0; k < ops.length; k++) {
-        let op = ops[k];
-        let sign = signs[k];
+  for (let k = 0; k < ops.length; k++) {
+    let op = ops[k];
+    let sign = signs[k];
+
+    for (let i = 0; i < values.length; i++) {
+      for (let j = i+1; j < values.length; j++) {
+        let a = Math.max(values[i], values[j]);
+        let b = Math.min(values[i], values[j]);
         let res = op(a, b);
         if (!res) {
           continue;
@@ -47,6 +48,6 @@ onmessage = function(e) {
   let values = e.data;
 
   let solution = solve(values, target);
-  console.log(`Target=${target} Solution=${solution}`);
+  console.log(`Target:[${target}] Solution:[${solution.join(" ; ")}]`);
   postMessage(solution);
 }
