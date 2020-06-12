@@ -4,32 +4,101 @@
     <title>This is the title of the webpage!</title>
   </head>
   <body>
-    <p>
-      Use: <div id="selectedValues"></div>
-    </p>
-    <p>
-      Target: <div id="targetValue"></div>
-    </p>
-    <p>
-      <button id="solutionBtn" onclick="toggleSolution()">Solution</button><div id="solution" style="display: none"></div>
-    </p>
+    <p>Target: <span id="targetValue"></span></p>
+    <p><span id="operators"></span><div id="selectedValues"></div></p>
+    <p id="solutionSteps"></p>
+    <div id="success" style="width: 200px; height: 200px; overflow: hidden;" hidden>
+      <img src="success.webp" style="margin: -50px 0 0 -150px">
+    </div>
+    <p><button id="solutionBtn" onclick="toggleSolution()">Solution</button><div id="solution" hidden></div></p>
     <script>
 
-let solutionDiv = document.getElementById("solution");
 
+let ops = [add, sub, mul, div];
+let signs = ["+", "-", "*", "/"];
+let values = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 25, 50, 75, 100];
+let selectedValues = [];
+let operands = [];
+let operandIds = [[]];
+let numOperations = -1;
+
+function add(a, b) { return a + b; }
+function mul(a, b) { return (a != 1 && b != 1) ? a * b : null; }
+function sub(a, b) { return (a > b) ? a - b : null; }
+function div(a, b) { return (a % b == 0 && b != 1) ? a / b : null; }
 function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
 }
+
+//========================================================================================
+
+let solutionDiv = document.getElementById("solution");
+let solutionSteps = document.getElementById("solutionSteps");
+document.getElementById("operators").innerHTML = signs.map(o => `<button onclick="useOperator('${o}')">${o}</button>`).join(" ");
+
+function curOpElement() {
+  return document.getElementById(`operation${numOperations}`);
+}
 function toggleSolution() {
-  if (solutionDiv.style.display === "none") {
-    solutionDiv.style.display = "block";
-  } else {
-    solutionDiv.style.display = "none";
+  solutionDiv.hidden = !solutionDiv.hidden;
+}
+function useValue(value, id) {
+  if (operands.length != 0 && operands.length != 2) {
+    return;
+  }
+  let opElement = curOpElement();
+
+  operands.push(value);
+  operandIds[numOperations].push(id);
+  opElement.innerHTML = opElement.innerHTML + ` ${value} `;
+  document.getElementById(id).disabled = true;
+
+  if (operands.length == 3) {
+    let result = ops[signs.indexOf(operands[1])](operands[0], operands[2]);
+    if (!!result) {
+      opElement.innerHTML = opElement.innerHTML + ` = <button id="result${numOperations}" onclick="useValue(${result}, 'result${numOperations}')">${result}</button> <button onclick="cancelOperation(${numOperations})">x</button><br>`;
+      if (result == targetValue) {
+        document.getElementById("success").hidden = false;
+      }
+    } else {
+      removeLastOperation();
+    }
+    newEmptyOperation();
+    operands = [];
   }
 }
-let values = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 25, 50, 75, 100];
+function useOperator(operator) {
+  if (operands.length != 1) {
+    return;
+  }
+  operands.push(operator);
+  let opElement = curOpElement();
+  opElement.innerHTML = opElement.innerHTML + ` ${operator} `;
+}
+function removeLastOperation() {
+  let opElement = curOpElement();
+  solutionSteps.removeChild(opElement);
+  operandIds[numOperations].forEach(id => document.getElementById(id).disabled = false);
+  operandIds.pop();
+  numOperations = numOperations - 1;
+}
+function newEmptyOperation() {
+  numOperations = numOperations + 1;
+  let newOpElement = document.createElement("span");
+  newOpElement.id = `operation${numOperations}`;
+  solutionSteps.appendChild(newOpElement);
+  operandIds.push([]);
+}
+function cancelOperation(operationId) {
+  while (numOperations >= operationId) {
+    removeLastOperation();
+  }
+  newEmptyOperation();
+}
 
-let selectedValues = [];
+//========================================================================================
+newEmptyOperation();
+
 while (selectedValues.length < 6) {
   let selectedIndex = getRandomInt(values.length);
   selectedValues.push(values.splice(selectedIndex, 1)[0]);
@@ -38,15 +107,15 @@ let targetValue = getRandomInt(900) + 100;
 let nextTargetStep = 1;
 let nextTargetDirection = -1;
 
-document.getElementById("selectedValues").textContent = selectedValues.join();
+document.getElementById("selectedValues").innerHTML = selectedValues.map((v, i) => `<button id="selectedValue${i}" onclick="useValue(${v}, 'selectedValue${i}')">${v}</button>` ).join(", ");
 document.getElementById("targetValue").textContent = targetValue;
 solutionDiv.innerHTML = "";
 
 var worker = new Worker('worker.js');
 worker.onmessage = function(e) {
   let solution = e.data;
-  let solutionText = !!solution ? solution.join("<br/>") : `No solution for ${targetValue}!`;
-  solutionDiv.innerHTML = solutionDiv.innerHTML + "<br/>" + solutionText;
+  let solutionText = !!solution ? solution.join("<br>") : `No solution for ${targetValue}!`;
+  solutionDiv.innerHTML = solutionDiv.innerHTML + "<br>" + solutionText;
 
   if (!solution) {
     targetValue = targetValue + (nextTargetStep * nextTargetDirection);
