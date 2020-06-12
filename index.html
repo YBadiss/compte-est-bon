@@ -11,7 +11,7 @@
   </head>
   <body>
     <div class="content">
-      <p>Target: <span id="targetValue"></span></p>
+      <p>Target: <span id="targetValue"></span><img src="refresh.png" style="width: 20px; height: 20px;" onclick="refresh()"></p>
       <p><span id="operators"></span><div id="selectedValues"></div></p>
       <p id="solutionSteps"></p>
       <div id="success" style="width: 200px; height: 200px; overflow: hidden;" hidden>
@@ -29,6 +29,9 @@ let selectedValues = [];
 let operands = [];
 let operandIds = [[]];
 let numOperations = -1;
+let targetValue = 0;
+let nextTargetStep = 1;
+let nextTargetDirection = -1;
 
 function add(a, b) { return a + b; }
 function mul(a, b) { return (a != 1 && b != 1) ? a * b : null; }
@@ -105,19 +108,30 @@ function cancelOperation(operationId) {
 }
 
 //========================================================================================
-newEmptyOperation();
+function refresh() {
+  values = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 25, 50, 75, 100];
+  cancelOperation(0);
+  selectedValues = [];
+  operands = [];
+  operandIds = [[]];
+  numOperations = -1;
 
-while (selectedValues.length < 6) {
-  let selectedIndex = getRandomInt(values.length);
-  selectedValues.push(values.splice(selectedIndex, 1)[0]);
+  while (selectedValues.length < 6) {
+    let selectedIndex = getRandomInt(values.length);
+    selectedValues.push(values.splice(selectedIndex, 1)[0]);
+  }
+  targetValue = getRandomInt(900) + 100;
+  nextTargetStep = 1;
+  nextTargetDirection = -1;
+
+  document.getElementById("selectedValues").innerHTML = selectedValues.map((v, i) => `<button id="selectedValue${i}" onclick="useValue(${v}, 'selectedValue${i}')">${v}</button>` ).join(", ");
+  document.getElementById("targetValue").textContent = targetValue;
+  solutionDiv.innerHTML = "";
+
+  worker.postMessage(selectedValues.concat([targetValue]));
 }
-let targetValue = getRandomInt(900) + 100;
-let nextTargetStep = 1;
-let nextTargetDirection = -1;
 
-document.getElementById("selectedValues").innerHTML = selectedValues.map((v, i) => `<button id="selectedValue${i}" onclick="useValue(${v}, 'selectedValue${i}')">${v}</button>` ).join(", ");
-document.getElementById("targetValue").textContent = targetValue;
-solutionDiv.innerHTML = "";
+//========================================================================================
 
 var worker = new Worker('worker.js');
 worker.onmessage = function(e) {
@@ -130,10 +144,12 @@ worker.onmessage = function(e) {
     nextTargetStep = nextTargetStep + 1;
     nextTargetDirection = nextTargetDirection * -1;
     worker.postMessage(selectedValues.concat([targetValue]))
+  } else {
+    document.getElementById("targetValue").textContent = targetValue;
   }
 };
 
-worker.postMessage(selectedValues.concat([targetValue]));
+refresh();
     </script>
   </body>
 </html>
