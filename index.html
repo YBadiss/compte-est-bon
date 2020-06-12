@@ -1,16 +1,24 @@
 <!doctype html>
 <html>
+  <style>
+    .content {
+      max-width: 500px;
+      margin: auto;
+    }
+  </style>
   <head>
     <title>This is the title of the webpage!</title>
   </head>
   <body>
-    <p>Target: <span id="targetValue"></span></p>
-    <p><span id="operators"></span><div id="selectedValues"></div></p>
-    <p id="solutionSteps"></p>
-    <div id="success" style="width: 200px; height: 200px; overflow: hidden;" hidden>
-      <img src="success.webp" style="margin: -50px 0 0 -150px">
+    <div class="content">
+      <p>Target: <span id="targetValue"></span></p>
+      <p><span id="operators"></span><div id="selectedValues"></div></p>
+      <p id="solutionSteps"></p>
+      <div id="success" style="width: 200px; height: 200px; overflow: hidden;" hidden>
+        <img src="success.webp" style="margin: -50px 0 0 -150px">
+      </div>
+      <p><button id="solutionBtn" onclick="toggleSolution()">Solution</button><div id="solution" hidden></div></p>
     </div>
-    <p><button id="solutionBtn" onclick="toggleSolution()">Solution</button><div id="solution" hidden></div></p>
     <script>
 
 
@@ -56,7 +64,7 @@ function useValue(value, id) {
   if (operands.length == 3) {
     let result = ops[signs.indexOf(operands[1])](operands[0], operands[2]);
     if (!!result) {
-      opElement.innerHTML = opElement.innerHTML + ` = <button id="result${numOperations}" onclick="useValue(${result}, 'result${numOperations}')">${result}</button> <button onclick="cancelOperation(${numOperations})">x</button><br>`;
+      opElement.innerHTML = opElement.innerHTML + ` = <button id="result${numOperations}" onclick="useValue(${result}, 'result${numOperations}')">${result}</button> <img src="delete.webp" style="width: 15px; height: 15px;" onclick="cancelOperation(${numOperations})"><br>`;
       if (result == targetValue) {
         document.getElementById("success").hidden = false;
       }
@@ -64,7 +72,6 @@ function useValue(value, id) {
       removeLastOperation();
     }
     newEmptyOperation();
-    operands = [];
   }
 }
 function useOperator(operator) {
@@ -88,6 +95,7 @@ function newEmptyOperation() {
   newOpElement.id = `operation${numOperations}`;
   solutionSteps.appendChild(newOpElement);
   operandIds.push([]);
+  operands = [];
 }
 function cancelOperation(operationId) {
   while (numOperations >= operationId) {
