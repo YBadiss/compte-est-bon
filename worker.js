@@ -48,6 +48,6 @@ onmessage = function(e) {
   let values = e.data;
 
   let solution = solve(values, target);
-  console.log(`Target:[${target}] Solution:[${solution.join(" ; ")}]`);
+  console.log(`Target:[${target}] Solution:[${solution}]`);
   postMessage(solution);
 }
