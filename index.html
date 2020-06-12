@@ -15,7 +15,7 @@
       <p><span id="operators"></span><div id="selectedValues"></div></p>
       <p id="solutionSteps"></p>
       <div id="success" style="width: 200px; height: 200px; overflow: hidden;" hidden>
-        <img src="success.webp" style="margin: -50px 0 0 -150px">
+        <img src="success.gif" style="margin: -50px 0 0 -150px">
       </div>
       <p><button id="solutionBtn" onclick="toggleSolution()">Solution</button><div id="solution" hidden></div></p>
     </div>
@@ -64,7 +64,7 @@ function useValue(value, id) {
   if (operands.length == 3) {
     let result = ops[signs.indexOf(operands[1])](operands[0], operands[2]);
     if (!!result) {
-      opElement.innerHTML = opElement.innerHTML + ` = <button id="result${numOperations}" onclick="useValue(${result}, 'result${numOperations}')">${result}</button> <img src="delete.webp" style="width: 15px; height: 15px;" onclick="cancelOperation(${numOperations})"><br>`;
+      opElement.innerHTML = opElement.innerHTML + ` = <button id="result${numOperations}" onclick="useValue(${result}, 'result${numOperations}')">${result}</button> <img src="delete.gif" style="width: 15px; height: 15px;" onclick="cancelOperation(${numOperations})"><br>`;
       if (result == targetValue) {
         document.getElementById("success").hidden = false;
       }
