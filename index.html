@@ -32,6 +32,7 @@ let numOperations = -1;
 let targetValue = 0;
 let nextTargetStep = 1;
 let nextTargetDirection = -1;
+let worker = null;
 
 function add(a, b) { return a + b; }
 function mul(a, b) { return (a != 1 && b != 1) ? a * b : null; }
@@ -128,26 +129,28 @@ function refresh() {
   document.getElementById("targetValue").textContent = targetValue;
   solutionDiv.innerHTML = "";
 
+  if (!!worker) {
+    worker.terminate();
+  }
+  worker = new Worker('worker.js');
+  worker.onmessage = function(e) {
+    let solution = e.data;
+    let solutionText = !!solution ? solution.join("<br>") : `No solution for ${targetValue}!`;
+    solutionDiv.innerHTML = solutionDiv.innerHTML + "<br>" + solutionText;
+
+    if (!solution) {
+      targetValue = targetValue + (nextTargetStep * nextTargetDirection);
+      nextTargetStep = nextTargetStep + 1;
+      nextTargetDirection = nextTargetDirection * -1;
+      worker.postMessage(selectedValues.concat([targetValue]))
+    } else {
+      document.getElementById("targetValue").textContent = targetValue;
+    }
+  };
   worker.postMessage(selectedValues.concat([targetValue]));
 }
 
 //========================================================================================
-
-var worker = new Worker('worker.js');
-worker.onmessage = function(e) {
-  let solution = e.data;
-  let solutionText = !!solution ? solution.join("<br>") : `No solution for ${targetValue}!`;
-  solutionDiv.innerHTML = solutionDiv.innerHTML + "<br>" + solutionText;
-
-  if (!solution) {
-    targetValue = targetValue + (nextTargetStep * nextTargetDirection);
-    nextTargetStep = nextTargetStep + 1;
-    nextTargetDirection = nextTargetDirection * -1;
-    worker.postMessage(selectedValues.concat([targetValue]))
-  } else {
-    document.getElementById("targetValue").textContent = targetValue;
-  }
-};
 
 refresh();
     </script>
