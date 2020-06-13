@@ -110,12 +110,9 @@ function cancelOperation(operationId) {
 
 //========================================================================================
 function refresh() {
-  values = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 25, 50, 75, 100];
   cancelOperation(0);
+  values = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 25, 50, 75, 100];
   selectedValues = [];
-  operands = [];
-  operandIds = [[]];
-  numOperations = -1;
 
   while (selectedValues.length < 6) {
     let selectedIndex = getRandomInt(values.length);
