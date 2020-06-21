@@ -20,7 +20,7 @@
       <div id="success" style="width: 200px; height: 200px; overflow: hidden;" hidden>
         <img src="success.gif" style="margin: -50px 0 0 -150px">
       </div>
-      <p><button id="solutionBtn" onclick="showSolution()">I give up...</button><div id="solution" hidden></div></p>
+      <p><button id="solutionBtn" onclick="loseGame()">I give up...</button><div id="solution" hidden></div></p>
     </div>
     <script>
 
@@ -55,9 +55,6 @@ document.getElementById("operators").innerHTML = signs.map(o => `<button onclick
 function curOpElement() {
   return document.getElementById(`operation${numOperations}`);
 }
-function showSolution() {
-  solutionDiv.hidden = false;
-}
 function useValue(value, id) {
   if (operands.length == 1) {
     removeLastOperation();
@@ -78,7 +75,7 @@ function useValue(value, id) {
     if (!!result) {
       opElement.innerHTML = opElement.innerHTML + ` = <button id="result${numOperations}" onclick="useValue(${result}, 'result${numOperations}')">${result}</button> <img src="delete.gif" style="width: 15px; height: 15px;" onclick="cancelOperation(${numOperations})"><br>`;
       if (result == targetValue) {
-        successGif.hidden = false;
+        winGame();
       }
     } else {
       removeLastOperation();
@@ -128,8 +125,28 @@ function cancelOperation(operationId) {
   newEmptyOperation();
 }
 
+function endGame(result) {
+  if (localStorage.games.length > 0) {
+    let lastGame = localStorage.games[localStorage.games.length - 1];
+    if (!lastGame.end) { lastGame.end = Date.now(); }
+    if (!lastGame.result) { lastGame.result = result ? result : "skip"; }
+    localStorage.games[localStorage.games.length - 1] = lastGame;
+  }
+}
+
+function winGame() {
+  endGame("win");
+  successGif.hidden = false;
+}
+
+function loseGame() {
+  endGame("lose");
+  solutionDiv.hidden = false;
+}
+
 //========================================================================================
 function refresh() {
+  endGame();
   cancelOperation(0);
   values = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 25, 50, 75, 100];
   selectedValues = [];
@@ -164,6 +181,14 @@ function refresh() {
       worker.postMessage(selectedValues.concat([targetValue]))
     } else {
       document.getElementById("targetValue").textContent = targetValue;
+
+      localStorage.games.push({
+        targetValue: targetValue,
+        selectedValues: selectedValues,
+        start: Date.now(),
+        end: null,
+        result: null,
+      });
     }
   };
   worker.postMessage(selectedValues.concat([targetValue]));
