@@ -58,7 +58,11 @@ function toggleSolution() {
   solutionDiv.hidden = !solutionDiv.hidden;
 }
 function useValue(value, id) {
-  if (operands.length != 0 && operands.length != 2) {
+  if (operands.length == 1) {
+    removeLastOperation();
+    newEmptyOperation();
+  }
+  else if (operands.length != 0 && operands.length != 2) {
     return;
   }
   let opElement = curOpElement();
@@ -82,8 +86,13 @@ function useValue(value, id) {
   }
 }
 function useOperator(operator) {
-  if (operands.length != 1) {
+  if (operands.length == 0) {
     return;
+  } else if (operands.length == 2) {
+    let value = operands[0];
+    let id = operandIds[numOperations][0];
+    operands.pop();
+    useValue(value, id);
   }
   operands.push(operator);
   let opElement = curOpElement();
