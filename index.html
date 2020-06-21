@@ -48,14 +48,15 @@ function getRandomInt(max) {
 //========================================================================================
 
 let solutionDiv = document.getElementById("solution");
+let successGif = document.getElementById("success");
 let solutionSteps = document.getElementById("solutionSteps");
 document.getElementById("operators").innerHTML = signs.map(o => `<button onclick="useOperator('${o}')">${o}</button>`).join(" ");
 
 function curOpElement() {
   return document.getElementById(`operation${numOperations}`);
 }
-function toggleSolution() {
-  solutionDiv.hidden = !solutionDiv.hidden;
+function showSolution() {
+  solutionDiv.hidden = false;
 }
 function useValue(value, id) {
   if (operands.length == 1) {
@@ -77,7 +78,7 @@ function useValue(value, id) {
     if (!!result) {
       opElement.innerHTML = opElement.innerHTML + ` = <button id="result${numOperations}" onclick="useValue(${result}, 'result${numOperations}')">${result}</button> <img src="delete.gif" style="width: 15px; height: 15px;" onclick="cancelOperation(${numOperations})"><br>`;
       if (result == targetValue) {
-        document.getElementById("success").hidden = false;
+        successGif.hidden = false;
       }
     } else {
       removeLastOperation();
@@ -132,7 +133,8 @@ function refresh() {
   cancelOperation(0);
   values = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 25, 50, 75, 100];
   selectedValues = [];
-  document.getElementById("success").hidden = true;
+  successGif.hidden = true;
+  solutionDiv.hidden = true;
 
   while (selectedValues.length < 6) {
     let selectedIndex = getRandomInt(values.length);
@@ -165,6 +167,12 @@ function refresh() {
     }
   };
   worker.postMessage(selectedValues.concat([targetValue]));
+}
+
+//========================================================================================
+
+if (!localStorage.games) {
+  localStorage.games = [];
 }
 
 //========================================================================================
