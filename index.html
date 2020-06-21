@@ -87,7 +87,14 @@ function useValue(value, id) {
 }
 function useOperator(operator) {
   if (operands.length == 0) {
-    return;
+    if (numOperations == 0) {
+      return;
+    } else {
+      let id = `result${numOperations - 1}`;
+      let resultButton = document.getElementById(id);
+      let value = parseInt(resultButton.textContent);
+      useValue(value, id);
+    }
   } else if (operands.length == 2) {
     let value = operands[0];
     let id = operandIds[numOperations][0];
