@@ -5,19 +5,22 @@
       max-width: 500px;
       margin: auto;
     }
+    .content * {
+      font-size: x-large;
+    }
   </style>
   <head>
     <title>This is the title of the webpage!</title>
   </head>
   <body>
     <div class="content">
-      <p>Target: <span id="targetValue"></span><img src="refresh.png" style="width: 20px; height: 20px;" onclick="refresh()"></p>
+      <p>Target: <span id="targetValue"></span><img src="refresh.png" style="width: 20px; height: 20px; float: right;" onclick="refresh()"></p>
       <p><span id="operators"></span><div id="selectedValues"></div></p>
       <p id="solutionSteps"></p>
       <div id="success" style="width: 200px; height: 200px; overflow: hidden;" hidden>
         <img src="success.gif" style="margin: -50px 0 0 -150px">
       </div>
-      <p><button id="solutionBtn" onclick="toggleSolution()">Solution</button><div id="solution" hidden></div></p>
+      <p><button id="solutionBtn" onclick="showSolution()">I give up...</button><div id="solution" hidden></div></p>
     </div>
     <script>
 
