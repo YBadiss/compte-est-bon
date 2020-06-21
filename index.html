@@ -126,12 +126,14 @@ function cancelOperation(operationId) {
 }
 
 function endGame(result) {
-  if (localStorage.games.length > 0) {
-    let lastGame = localStorage.games[localStorage.games.length - 1];
+  let games = loadGames();
+  if (games.length > 0) {
+    let lastGame = games[games.length - 1];
     if (!lastGame.end) { lastGame.end = Date.now(); }
     if (!lastGame.result) { lastGame.result = result ? result : "skip"; }
-    localStorage.games[localStorage.games.length - 1] = lastGame;
+    games[games.length - 1] = lastGame;
   }
+  saveGames(games);
 }
 
 function winGame() {
@@ -181,14 +183,16 @@ function refresh() {
       worker.postMessage(selectedValues.concat([targetValue]))
     } else {
       document.getElementById("targetValue").textContent = targetValue;
-
-      localStorage.games.push({
+      
+      let games = loadGames();
+      games.push({
         targetValue: targetValue,
         selectedValues: selectedValues,
         start: Date.now(),
         end: null,
         result: null,
       });
+      saveGames(games);
     }
   };
   worker.postMessage(selectedValues.concat([targetValue]));
@@ -196,8 +200,16 @@ function refresh() {
 
 //========================================================================================
 
+function saveGames(games) {
+  localStorage.games = JSON.stringify(games);
+}
+
+function loadGames() {
+  return JSON.parse(localStorage.games);
+}
+
 if (!localStorage.games) {
-  localStorage.games = [];
+  saveGames([]);
 }
 
 //========================================================================================
