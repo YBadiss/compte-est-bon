@@ -309,6 +309,23 @@ function updatePieChart() {
   }
 }
 
+//========================================================================================
+
+function httpGetAsync(url, callback)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() {
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    }
+    xmlHttp.open("GET", url, true); // true for asynchronous
+    xmlHttp.send(null);
+}
+
+httpGetAsync(`api.giphy.com/v1/gifs/translate?api_key=Lm9rYutuVfb90n9bItFPrc4sAmWNi2X5&s=winner&weirdness=5`, function(response) {
+  console.log(response);
+});
+
 refresh();
     </script>
   </body>
