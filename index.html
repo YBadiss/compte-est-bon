@@ -8,6 +8,30 @@
     .content * {
       font-size: x-large;
     }
+    .pie-chart {
+      position: relative;
+      width: 500px;
+      min-height: 350px;
+      margin: 0;
+      outline: 1px solid #ccc;
+    }
+    .pie-chart figcaption {
+      position: absolute;
+      bottom: 1em;
+      right: 1em;
+      font-size: smaller;
+      text-align: right;
+    }
+    .pie-chart span:after {
+      display: inline-block;
+      content: "";
+      width: 0.8em;
+      height: 0.8em;
+      margin-left: 0.4em;
+      height: 0.8em;
+      border-radius: 0.2em;
+      background: currentColor;
+    }
   </style>
   <head>
     <title>This is the title of the webpage!</title>
@@ -21,6 +45,14 @@
         <img src="success.gif" style="margin: -50px 0 0 -150px">
       </div>
       <p><button id="solutionBtn" onclick="loseGame()">I give up...</button><div id="solution" hidden></div></p>
+
+      <figure class="pie-chart" id="pie" hidden>
+        <figcaption>
+          <span id="wins" style="color:#59a14f"></span><br>
+          <span id="losses" style="color:#ee3050"></span><br>
+          <span id="skips" style="color:#edc949"></span>
+        </figcaption>
+      </figure>
     </div>
     <script>
 
@@ -187,6 +219,7 @@ function randomSelectedValues() {
 }
 
 function initScreen() {
+  updatePieChart();
   cancelOperation(0);
   successGif.hidden = true;
   solutionDiv.hidden = true;
@@ -242,6 +275,7 @@ function refresh(forceRefresh) {
 
 function saveGames(games) {
   localStorage.games = JSON.stringify(games);
+  updatePieChart();
 }
 
 function loadGames() {
@@ -253,6 +287,27 @@ if (!localStorage.games) {
 }
 
 //========================================================================================
+
+function updatePieChart() {
+  let games = loadGames();
+  let numWins = games.filter(g => g.result == "win").length;
+  let numLosses = games.filter(g => g.result == "lose").length;
+  let numSkips = games.filter(g => g.result == "skip").length;
+  let totalGames = numWins + numLosses + numSkips;
+
+  if (totalGames > 0) {
+    let pctWins = numWins / totalGames * 100;
+    let pctLosses = pctWins + (numLosses / totalGames * 100);
+    let pctSkips = pctLosses + (numSkips / totalGames * 100);
+    let pieChart = document.getElementById("pie");
+    pieChart.hidden = false;
+    pieChart.style.background = `radial-gradient(circle closest-side, transparent 70%, white 0), conic-gradient(#59a14f 0, #59a14f ${pctWins}%, #ee3050 0, #ee3050 ${pctLosses}%, #edc949 0, #edc949 ${pctSkips}%)`;
+
+    document.getElementById("wins").textContent = `${numWins} Wins`;
+    document.getElementById("losses").textContent = `${numLosses} Losses`;
+    document.getElementById("skips").textContent = `${numSkips} Skipped`;
+  }
+}
 
 refresh();
     </script>
