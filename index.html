@@ -14,7 +14,7 @@
   </head>
   <body>
     <div class="content">
-      <p>Target: <span id="targetValue"></span><img src="refresh.png" style="width: 20px; height: 20px; float: right;" onclick="refresh()"></p>
+      <p>Target: <span id="targetValue"></span><img src="refresh.png" style="width: 20px; height: 20px; float: right;" onclick="refresh(true)"></p>
       <p><span id="operators"></span><div id="selectedValues"></div></p>
       <p id="solutionSteps"></p>
       <div id="success" style="width: 200px; height: 200px; overflow: hidden;" hidden>
@@ -125,6 +125,19 @@ function cancelOperation(operationId) {
   newEmptyOperation();
 }
 
+//========================================================================================
+
+function getGameInProgress() {
+  let games = loadGames();
+  if (games.length > 0) {
+    let lastGame = games[games.length - 1];
+    if (!lastGame.result) {
+      return lastGame;
+    }
+  }
+  return null;
+}
+
 function endGame(result) {
   let games = loadGames();
   if (games.length > 0) {
@@ -146,27 +159,47 @@ function loseGame() {
   solutionDiv.hidden = false;
 }
 
+function saveNewGame() {
+  let games = loadGames();
+  games.push({
+    targetValue: targetValue,
+    selectedValues: selectedValues,
+    start: Date.now(),
+    end: null,
+    result: null,
+  });
+  saveGames(games);
+}
+
 //========================================================================================
-function refresh() {
-  endGame();
-  cancelOperation(0);
+
+function randomTargetValue() {
+  targetValue = getRandomInt(900) + 100;
+}
+
+function randomSelectedValues() {
   values = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 25, 50, 75, 100];
   selectedValues = [];
-  successGif.hidden = true;
-  solutionDiv.hidden = true;
-
   while (selectedValues.length < 6) {
     let selectedIndex = getRandomInt(values.length);
     selectedValues.push(values.splice(selectedIndex, 1)[0]);
   }
-  targetValue = getRandomInt(900) + 100;
+}
+
+function initScreen() {
+  cancelOperation(0);
+  successGif.hidden = true;
+  solutionDiv.hidden = true;
+
   nextTargetStep = 1;
   nextTargetDirection = -1;
 
   document.getElementById("selectedValues").innerHTML = selectedValues.map((v, i) => `<button id="selectedValue${i}" onclick="useValue(${v}, 'selectedValue${i}')">${v}</button>` ).join(", ");
   document.getElementById("targetValue").textContent = targetValue;
   solutionDiv.innerHTML = "";
+}
 
+function findSolution() {
   if (!!worker) {
     worker.terminate();
   }
@@ -183,19 +216,26 @@ function refresh() {
       worker.postMessage(selectedValues.concat([targetValue]))
     } else {
       document.getElementById("targetValue").textContent = targetValue;
-      
-      let games = loadGames();
-      games.push({
-        targetValue: targetValue,
-        selectedValues: selectedValues,
-        start: Date.now(),
-        end: null,
-        result: null,
-      });
-      saveGames(games);
     }
   };
   worker.postMessage(selectedValues.concat([targetValue]));
+}
+
+function refresh(forceRefresh) {
+  let gameInProgress = getGameInProgress();
+
+  if (gameInProgress && !forceRefresh) {
+    targetValue = gameInProgress.targetValue;
+    selectedValues = gameInProgress.selectedValues;
+  } else {
+    endGame();
+    randomTargetValue();
+    randomSelectedValues();
+    saveNewGame();
+  }
+
+  initScreen();
+  findSolution();
 }
 
 //========================================================================================
