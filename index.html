@@ -41,8 +41,8 @@
       <p>Target: <span id="targetValue"></span><img src="refresh.png" style="width: 20px; height: 20px; float: right;" onclick="refresh(true)"></p>
       <p><span id="operators"></span><div id="selectedValues"></div></p>
       <p id="solutionSteps"></p>
-      <div id="success" style="width: 200px; height: 200px; overflow: hidden;" hidden>
-        <img src="success.gif" style="margin: -50px 0 0 -150px">
+      <div id="success" style="width:100%;height:0;padding-bottom:56%;position:relative;" hidden>
+        <iframe id="successIframe" src="" width="100%" height="100%" style="position:absolute" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
       </div>
       <p><button id="solutionBtn" onclick="loseGame()">I give up...</button><div id="solution" hidden></div></p>
 
@@ -219,6 +219,11 @@ function randomSelectedValues() {
 }
 
 function initScreen() {
+  // Yes I know my api key is hardcoded, I don't really care though as this is just for fun
+  httpGetAsync(`https://api.giphy.com/v1/gifs/translate?api_key=Lm9rYutuVfb90n9bItFPrc4sAmWNi2X5&s=winner&weirdness=5`, function(response) {
+    console.log(response);
+    document.getElementById("successIframe").src = response.data.embed_url;
+  });
   updatePieChart();
   cancelOperation(0);
   successGif.hidden = true;
@@ -316,15 +321,11 @@ function httpGetAsync(url, callback)
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-            callback(xmlHttp.responseText);
+            callback(JSON.parse(xmlHttp.responseText));
     }
     xmlHttp.open("GET", url, true); // true for asynchronous
     xmlHttp.send(null);
 }
-
-httpGetAsync(`api.giphy.com/v1/gifs/translate?api_key=Lm9rYutuVfb90n9bItFPrc4sAmWNi2X5&s=winner&weirdness=5`, function(response) {
-  console.log(response);
-});
 
 refresh();
     </script>
